@@ -1,0 +1,18 @@
+#   -- ==============================================   
+#   -- Intalar imagen MongoDb
+#   -- seccion      :  05  < Nest CLI Resource - Brands CRUD	> <03-pokedex>
+#  -- versql: sc_2\sc_Docker\V00 01 njn Docker MongoDb.sql
+#   -- ============================================== 
+
+version: '3'
+
+services:
+  db:
+    image: mongo:5
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGODB_DATABASE: nest-pokemon
+    volumes:
+      - ./mongo:/data/db

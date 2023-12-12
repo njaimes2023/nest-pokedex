@@ -1,25 +1,45 @@
 // -- ==============================================   
-// --  filex: src\pokemon\pokemon.service.ts
+// --  filex: sc_0\V20 01 njn paginacion.sql
+// --  filex: sc_0\V22 03 njn variables Entorno.sql
+// --  file : src\pokemon\pokemon.service.ts
 // --  ============================================== 
-
 
 import {BadRequestException, Injectable, Post, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
 import { Model, isValidObjectId } from 'mongoose';
 import { Pokemon } from './entities/pokemon.entity';
 
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+
 
 
 @Injectable()
 export class PokemonService {
  
+    //variables de entorno
+  private defaultLimit: number;
+
   //-- insertar en base de datos
   constructor(
      @InjectModel( Pokemon.name )
     private readonly pokemonModel: Model<Pokemon>,
-  ) {}
+    //variables de entorno
+    private readonly configService: ConfigService,
+
+  ) {
+
+    // console.log (process.env.DEFAULT_LIMIT);
+    // console.log (configService.getOrThrow ('jwt-seed') );
+     this.defaultLimit = configService.get<number>('defaultLimit') ;
+    // console.log({ defaultLimit: configService.get<number>('defaultLimit') })
+
+    // console.log( this.defaultLimit);
+    
+
+  }
 
 //-- responder un error especifico
 
@@ -34,9 +54,24 @@ export class PokemonService {
     }
   }
 
-  findAll() {
-    return `This action returns all pokemon`;
+
+
+  findAll( paginationDto: PaginationDto ) {
+    //variables de entorno
+    // const { limit = 10, offset = 0 } = paginationDto;
+    const { limit = this.defaultLimit, offset = 0 } = paginationDto;
+
+    return this.pokemonModel.find()
+      .limit( limit )
+      .skip( offset )
+      .sort({
+        no: 1
+      })
+      .select('-__v');
+      
   }
+
+
 
 
   async findOne(term: string) {
